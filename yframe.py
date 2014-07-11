@@ -39,12 +39,12 @@ def convertToPngs(movieName, frameOutName, wdir='', startFrame =0, endFrame=99):
 	frame = True
 	k = 0
 	while frame:
+		frame = cv.QueryFrame(capture)
 		if k >= startFrame:
 			# TODO: we could put this in a try, except condition,
 			# but I'm happy to just let it fail naturally if there is a problem
 			# since it is writing out the frames as it progresses, we won't
 			# lose anything.
-			frame = cv.QueryFrame(capture)
 			cv.SaveImage(frameOutName + "{0:04d}.png".format(k), frame)
 
 		if k >= endFrame:
