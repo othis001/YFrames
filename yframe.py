@@ -51,8 +51,8 @@ def convertToPngs(movieName, frameOutName, wdir='', \
 			# but I'm happy to just let it fail naturally if there is a problem
 			# since it is writing out the frames as it progresses, we won't
 			# lose anything.
-			size = cv.GetSize(frame)
 			if maxDim:
+				size = cv.GetSize(frame)
 				maxFrameDim = max(size)
 				scale =float(maxFrameDim)/float(maxDim)
 				newSize = (int(floor(size[0]/scale + .5)), \
