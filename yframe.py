@@ -11,16 +11,24 @@ def convertToPngs(movieName, frameOutName, wdir='', startFrame =0, endFrame=99):
 	Converts a saved movie into a collection of png frames
 
 		movieName: name of movie file
+
 		frameOutName: prefix of each frame to be written out
 						should not have image type at the end
+
+		wdir: working directory (i.e. where the movie is and
+					where the frames will be written). In general
+					this should be its own directory for each movie,
+					since there are many frames in a given movie.
+
 		startFrame: first frame # to be written out
+
 		endFrame: last frame # to be written out
 
 	"""
 	os.chdir(wdir)
 
-	frameOutName = frameOutName.strip(".png")
-	frameOutName = frameOutName.strip(".jpeg")
+	frameOutName = frameOutName.replace(".png", '')
+	frameOutName = frameOutName.replace(".jpeg", '')
 
 	capture = cv.CaptureFromFile(movieName)
 
@@ -33,7 +41,7 @@ def convertToPngs(movieName, frameOutName, wdir='', startFrame =0, endFrame=99):
 		if k >= endFrame:
 			break
 		k += 1
-	print 'Converted {0} frames'.format(k)
+	print '\nConverted {0} frames'.format(k)
 
 def toCamelCase(preOutName):
 	"""crude function to convert a youtube video name into Camel Case"""
@@ -50,12 +58,16 @@ def toCamelCase(preOutName):
 			if space:
 				s = s.upper()
 				space = False
+			else:
+				s = s.lower()
 			outName += s
 	return outName
 
 def main():
 	"""
-	Downloads movie and converts first 99 frames
+	Downloads movie, creates a directory from the movie's title, 
+		and converts the first 99 frames of the movie to pngs in
+		the new directory.
 	
 	Note logging feature is experimental and not necessary.
 
@@ -71,7 +83,6 @@ def main():
 	logging.info("received user input: {0}".format(choice))
 
 	video = pafy.new(choice)
-
 	try:
 		best = video.getbest()
 	except Exception as e:
@@ -106,7 +117,6 @@ def main():
 	# see if movie exists in directory - if not create it
 	# TODO: really, we don't need to do this if we just made the directory.
 	files = [x.replace(cwd + dirName, "") for x in g.glob(cwd + dirName + "*")]
-	print outName
 	if movieName not in files:
 		logging.info("Naming video: {0}".format(outName))
 		logging.info("Attempting to download video.")
@@ -119,13 +129,15 @@ def main():
 	files = [x.replace(cwd + dirName, "") for x in g.glob(cwd+dirName+"*.png")]
 	if len(files) == 0:
 		logging.info("Attempting to convert movie to pngs.")
-		convertToPngs(movieName, preName, wdir)
+		convertToPngs(movieName, preName, wdir=wdir)
 		logging.info("converted movie to pngs.")
 	else:
 		logging.info("Exiting - pngs exist.")
 		print "Some pngs already exist. This code is only for demos.\nExiting."
 		logging.info("Exited due to pre-existing pngs.")
 		raise SystemExit
+	logging.info("Success!\n\n\n")
+	print "\nSuccess!\n"
 
 if __name__ == '__main__':
 	main()
