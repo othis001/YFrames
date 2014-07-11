@@ -62,12 +62,14 @@ def main():
 		print 'Could not connect. Exiting'
 		raise SystemExit
 	if best == None:
+		logging.exception("pafy could not connect. Exiting.")
 		print 'Could not connect. Exiting'
 		raise SystemExit
 
 	logging.info("Successfully instantiated Pafy object from video URL")
 	logging.info("Attempting to download video.")
 
+	# Name & directory formating.
 	cwd = os.getcwd()
 	preName = toCamelCase(best.title)
 	dirName = "/" + preName + "/"
@@ -75,16 +77,22 @@ def main():
 	movieName = preName + "." + best.extension
 	outName = cwd + dirName[1:] + movieName
 
+	# see if directory exists
+	# TODO: since we only have the first 5 words, there could
+	# be two different videos with the same initial 5 words
+	# should have a method of dealing with this.
 	files = [x.replace(cwd, '').strip('/') for x in g.glob(cwd + "/*")]
 	if preName not in files:
 		os.system("mkdir {0}".format(preName))
 	else:
 		print 'directory exists\n\n'
 
+	# see if movie exists in directory - if not create it
+	# TODO: really, we don't need to do this if we just made the directory.
 	files = [x.replace(cwd + dirName, "") for x in g.glob(cwd + dirName + "*")]
 	if movieName not in files:
+		logging.info("Attempting to download video.")
 		child = best.download(quiet=False, filepath=outName )
-		raise ValueError
 	else:
 		print 'file already exists ... skipping to conversion'
 
