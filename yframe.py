@@ -41,22 +41,31 @@ def convertToPngs(movieName, frameOutName, wdir='', \
 	# initiate movie stream
 	capture = cv.CaptureFromFile(movieName)
 
+	# extract frame size
+	nCols = int(cv.GetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_WIDTH))
+	nRows = int(cv.GetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_HEIGHT))
+	size = (nRows, nCols)
+	maxFrameDim = max(size)
+
+	# compute rescaling required based upon input
+	scale =float(maxFrameDim)/float(maxDim)
+	newSize = (int(floor(size[0]/scale + .5)), int(floor(size[1]/scale + .5)) )
+
+	# extract number of frames in video
+	NframesTot = int(cv.GetCaptureProperty(capture,cv.CV_CAP_PROP_FRAME_COUNT))
+
 	# loop over frames, writing out those in desired range.
-	frame = True
-	k = 0
-	while frame:
+	for k in xrange(NframesTot):
+		# i assume that there is no way to start at a particular frame
+		# and that we have to loop over all of them sequentially
 		frame = cv.QueryFrame(capture)
+
 		if k >= startFrame:
 			# TODO: we could put this in a try, except condition,
 			# but I'm happy to just let it fail naturally if there is a problem
 			# since it is writing out the frames as it progresses, we won't
 			# lose anything.
 			if maxDim:
-				size = cv.GetSize(frame)
-				maxFrameDim = max(size)
-				scale =float(maxFrameDim)/float(maxDim)
-				newSize = (int(floor(size[0]/scale + .5)), \
-							int(floor(size[1]/scale + .5)) )
 				smallFrame = cv.CreateImage(newSize,frame.depth,frame.nChannels)
 				cv.Resize(frame, smallFrame)
 				frame = smallFrame
@@ -68,7 +77,7 @@ def convertToPngs(movieName, frameOutName, wdir='', \
 	print '\n\nConverted {0} frames'.format(k)
 	return 0
 
-def toCamelCase(preOutName):
+def toCamelCase(preOutName, maxWords = 5):
 	"""crude function to convert a youtube video name into Camel Case"""
 	outName = ''
 	space = False
@@ -77,7 +86,7 @@ def toCamelCase(preOutName):
 		if s == ' ':
 			space = True
 			nWords += 1
-			if nWords == 5:
+			if nWords == maxWords:
 				break
 		if s.isalnum():
 			if space:
@@ -104,12 +113,26 @@ def main():
 			format='%(asctime)s %(message)s')
 
 	#Enter video url to be downloaded
-	choice = raw_input('Enter url: ')
-	logging.info("received user input: {0}".format(choice))
+	videoURL = raw_input('Enter url: ')
+	response = raw_input('Write frames (y/n)?: ')
+	if response[0].lower() == 'y':
+		response = raw_input('How many frames?: ')
+		try:
+			nFrames = int(response)
+		except:
+			print 'Input not understood.\nExiting\n'
+			raise SystemExit
+	else:
+		print 'No frames to be converted.\n'
+		nFrames = 0
+
+
+	logging.info("received user input: {0}".format(videoURL))
+	logging.info("# frames to be converted: {0}".format(nFrames))
 
 	try:
-		video = pafy.new(choice)
-		best = video.getbest()
+		video = pafy.new(videoURL)
+		best = video.getbest(preftype="mp4")
 	except Exception as e:
 		logging.exception(e)
 		print 'Could not connect. Exiting'
@@ -153,11 +176,11 @@ def main():
 
 
 	files = [x.replace(cwd + dirName, "") for x in g.glob(cwd+dirName+"*.png")]
-	if len(files) == 0:
+	if len(files) == 0 and nFrames > 0:
 		logging.info("Attempting to convert movie to pngs.")
 		convertToPngs(movieName, preName, wdir=wdir)
 		logging.info("converted movie to pngs.")
-	else:
+	elif nFrames != 0:
 		logging.info("Exiting - pngs exist.")
 		print "Some pngs already exist. This code is only for demos.\nExiting."
 		logging.info("Exited due to pre-existing pngs.")
