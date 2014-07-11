@@ -3,12 +3,13 @@
 from subprocess import *
 import sys
 import time
+import pafy
 
 #Function to convert videos to frames
 def convert(name):
     try:
         process = ['avconv', '-i', 'name', '-vsync', '1', '-r', '1', '-an', '-y', 'cwd/frames%d.jpg'] 
-        output = Popen(process, shell=True, stderr=PIPE)
+        output = call(process)
     except Exception, e:
         print e
         print 'Did not convert video'
@@ -16,8 +17,17 @@ def convert(name):
 
 #Enter video url to be downloaded
 choice = raw_input('Enter url: ')
-child = Popen('youtube-dl "%s"' %choice, shell=True, stderr=PIPE)
-child.wait()
+video = pafy.new(choice)
+#print (video.title)
+
+best = video.getbest()
+child = best.download(quiet=False)
+
+#time.sleep(555555)
+
+#print check_output('youtube-dl "%s%"', %choice, shell=True, stderr=PIPE)
+#child = Popen('youtube-dl "%s"' %choice, shell=True, stderr=PIPE)
+#child.wait()
 #Call function to convert video to png/jpeg frames
 convert(child)
 
