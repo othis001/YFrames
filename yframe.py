@@ -6,7 +6,7 @@ import os
 import glob as g
 import cv
 
-def convertToPngs(fileName, frameOutName, wdir):
+def convertToPngs(fileName, frameOutName, wdir, startFrame =0, endFrame=99):
 	"""Converts a saved move into a collection of png frames"""
 	os.chdir(wdir)
 
@@ -18,11 +18,10 @@ def convertToPngs(fileName, frameOutName, wdir):
 	frame = True
 	k = 0
 	while frame:
-		frame = cv.QueryFrame(capture)
-		cv.SaveImage(frameOutName + "{0:04d}.png".format(k), frame)
-		if k == 99:
-			# for now we have the arbitrary condition of stopping after 100 
-			# frames.
+		if k >= startFrame:
+			frame = cv.QueryFrame(capture)
+			cv.SaveImage(frameOutName + "{0:04d}.png".format(k), frame)
+		if k >= endFrame:
 			break
 		k += 1
 	print 'Converted {0} frames'.format(k)
@@ -75,7 +74,7 @@ def main():
 	dirName = "/" + preName + "/"
 	wdir = cwd + dirName
 	movieName = preName + "." + best.extension
-	outName = cwd + dirName[1:] + movieName
+	outName = cwd + dirName + movieName
 
 	# see if directory exists
 	# TODO: since we only have the first 5 words, there could
@@ -84,20 +83,20 @@ def main():
 	files = [x.replace(cwd, '').strip('/') for x in g.glob(cwd + "/*")]
 	if preName not in files:
 		logging.info("Creating directory.")
-		os.system("mkdir {0}".format(preName))
+		os.system("mkdir {0}".format(dirName))
 
 	# see if movie exists in directory - if not create it
 	# TODO: really, we don't need to do this if we just made the directory.
 	files = [x.replace(cwd + dirName, "") for x in g.glob(cwd + dirName + "*")]
+	print outName
 	if movieName not in files:
+		logging.info("Naming video: {0}".format(outName))
 		logging.info("Attempting to download video.")
 		child = best.download(quiet=False, filepath=outName )
 		logging.info("Successful download.")
 	else:
 		logging.info("File exists; skipping to download.")
 
-	logging.info("Naming video: {0}".format(outName))
-	logging.info("Attempting to download video.")
 
 	files = [x.replace(cwd + dirName, "") for x in g.glob(cwd+dirName+"*.png")]
 	if len(files) == 0:
