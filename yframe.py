@@ -107,8 +107,8 @@ def main():
 	choice = raw_input('Enter url: ')
 	logging.info("received user input: {0}".format(choice))
 
-	video = pafy.new(choice)
 	try:
+		video = pafy.new(choice)
 		best = video.getbest()
 	except Exception as e:
 		logging.exception(e)
