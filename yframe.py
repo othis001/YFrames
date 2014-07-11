@@ -25,23 +25,33 @@ def convertToPngs(movieName, frameOutName, wdir='', startFrame =0, endFrame=99):
 		endFrame: last frame # to be written out
 
 	"""
+	# change to working directory
 	os.chdir(wdir)
 
+	# strip frame prefix of unnecessary suffixes
 	frameOutName = frameOutName.replace(".png", '')
 	frameOutName = frameOutName.replace(".jpeg", '')
 
+	# initiate movie stream
 	capture = cv.CaptureFromFile(movieName)
 
+	# loop over frames, writing out those in desired range.
 	frame = True
 	k = 0
 	while frame:
 		if k >= startFrame:
+			# TODO: we could put this in a try, except condition,
+			# but I'm happy to just let it fail naturally if there is a problem
+			# since it is writing out the frames as it progresses, we won't
+			# lose anything.
 			frame = cv.QueryFrame(capture)
 			cv.SaveImage(frameOutName + "{0:04d}.png".format(k), frame)
+
 		if k >= endFrame:
 			break
 		k += 1
-	print '\nConverted {0} frames'.format(k)
+	print '\n\nConverted {0} frames'.format(k)
+	return 0
 
 def toCamelCase(preOutName):
 	"""crude function to convert a youtube video name into Camel Case"""
