@@ -25,9 +25,7 @@ child = best.download(quiet=False)
 
 #time.sleep(555555)
 
-#print check_output('youtube-dl "%s%"', %choice, shell=True, stderr=PIPE)
-#child = Popen('youtube-dl "%s"' %choice, shell=True, stderr=PIPE)
-#child.wait()
+
 #Call function to convert video to png/jpeg frames
 convert(child)
 
