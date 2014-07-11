@@ -4,13 +4,8 @@ import pafy
 import logging
 import os
 import glob as g
+import cv
 
-try:
-	import cv
-except:
-	print "\nYou must install open cv\n"
-	raise SystemExit
-	
 def convertToPngs(fileName, frameOutName, wdir):
 	"""Converts a saved move into a collection of png frames"""
 	os.chdir(wdir)
@@ -92,9 +87,19 @@ def main():
 		raise ValueError
 	else:
 		print 'file already exists ... skipping to conversion'
+
 	logging.info("Naming video: {0}".format(outName))
 	logging.info("Attempting to download video.")
-	convertToPngs(movieName, preName, wdir)
+
+	files = [x.replace(cwd + dirName, "") for x in g.glob(cwd+dirName+"*.png")]
+	if len(files) == 0:
+		logging.info("Attempting to convert movie to pngs.")
+		convertToPngs(movieName, preName, wdir)
+		logging.info("converted movie to pngs.")
+	else:
+		print "some pngs already exist. This code is only for demos.\nExiting."
+		logging.info("Exited due to pre-existing pngs.")
+		raise SystemExit
 
 if __name__ == '__main__':
 	main()
