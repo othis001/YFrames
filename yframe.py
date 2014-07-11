@@ -5,8 +5,10 @@ import logging
 import os
 import glob as g
 import cv
+from math import floor
 
-def convertToPngs(movieName, frameOutName, wdir='', startFrame =0, endFrame=99):
+def convertToPngs(movieName, frameOutName, wdir='', \
+					startFrame=0, endFrame=499, maxDim = 128):
 	"""
 	Converts a saved movie into a collection of png frames
 
@@ -24,6 +26,10 @@ def convertToPngs(movieName, frameOutName, wdir='', startFrame =0, endFrame=99):
 
 		endFrame: last frame # to be written out
 
+		maxDim: the maximum number of elements in any one dimension
+				of the output image. This should be an integer, but
+				if maxDim = False, then it will save the frames
+				in their original size.
 	"""
 	# change to working directory
 	os.chdir(wdir)
@@ -45,6 +51,15 @@ def convertToPngs(movieName, frameOutName, wdir='', startFrame =0, endFrame=99):
 			# but I'm happy to just let it fail naturally if there is a problem
 			# since it is writing out the frames as it progresses, we won't
 			# lose anything.
+			size = cv.GetSize(frame)
+			if maxDim:
+				maxFrameDim = max(size)
+				scale =float(maxFrameDim)/float(maxDim)
+				newSize = (int(floor(size[0]/scale + .5)), \
+							int(floor(size[1]/scale + .5)) )
+				smallFrame = cv.CreateImage(newSize,frame.depth,frame.nChannels)
+				cv.Resize(frame, smallFrame)
+				frame = smallFrame
 			cv.SaveImage(frameOutName + "{0:04d}.png".format(k), frame)
 
 		if k >= endFrame:
@@ -76,8 +91,8 @@ def toCamelCase(preOutName):
 def main():
 	"""
 	Downloads movie, creates a directory from the movie's title, 
-		and converts the first 99 frames of the movie to pngs in
-		the new directory.
+		and converts the first 500 frames of the movie to pngs in
+		the new directory (the frames will be at low resolution).
 	
 	Note logging feature is experimental and not necessary.
 
