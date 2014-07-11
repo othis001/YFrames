@@ -6,14 +6,23 @@ import os
 import glob as g
 import cv
 
-def convertToPngs(fileName, frameOutName, wdir, startFrame =0, endFrame=99):
-	"""Converts a saved move into a collection of png frames"""
+def convertToPngs(movieName, frameOutName, wdir='', startFrame =0, endFrame=99):
+	"""
+	Converts a saved movie into a collection of png frames
+
+		movieName: name of movie file
+		frameOutName: prefix of each frame to be written out
+						should not have image type at the end
+		startFrame: first frame # to be written out
+		endFrame: last frame # to be written out
+
+	"""
 	os.chdir(wdir)
 
 	frameOutName = frameOutName.strip(".png")
 	frameOutName = frameOutName.strip(".jpeg")
 
-	capture = cv.CaptureFromFile(fileName)
+	capture = cv.CaptureFromFile(movieName)
 
 	frame = True
 	k = 0
@@ -45,6 +54,15 @@ def toCamelCase(preOutName):
 	return outName
 
 def main():
+	"""
+	Downloads movie and converts first 99 frames
+	
+	Note logging feature is experimental and not necessary.
+
+	If you want more frames, you should import this module and call the
+		converter from a separate script.
+	"""
+
 	logging.basicConfig(filename='log_yframe.log', level=logging.DEBUG,\
 			format='%(asctime)s %(message)s')
 
