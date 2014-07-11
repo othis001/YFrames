@@ -82,8 +82,8 @@ def main():
 	# should have a method of dealing with this.
 	files = [x.replace(cwd, '').strip('/') for x in g.glob(cwd + "/*")]
 	if preName not in files:
-		logging.info("Creating directory.")
-		os.system("mkdir {0}".format(dirName))
+		logging.info("Creating directory {dirName}")
+		os.system("mkdir {0}".format(wdir))
 
 	# see if movie exists in directory - if not create it
 	# TODO: really, we don't need to do this if we just made the directory.
