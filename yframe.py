@@ -83,9 +83,8 @@ def main():
 	# should have a method of dealing with this.
 	files = [x.replace(cwd, '').strip('/') for x in g.glob(cwd + "/*")]
 	if preName not in files:
+		logging.info("Creating directory.")
 		os.system("mkdir {0}".format(preName))
-	else:
-		print 'directory exists\n\n'
 
 	# see if movie exists in directory - if not create it
 	# TODO: really, we don't need to do this if we just made the directory.
@@ -93,8 +92,9 @@ def main():
 	if movieName not in files:
 		logging.info("Attempting to download video.")
 		child = best.download(quiet=False, filepath=outName )
+		logging.info("Successful download.")
 	else:
-		print 'file already exists ... skipping to conversion'
+		logging.info("File exists; skipping to download.")
 
 	logging.info("Naming video: {0}".format(outName))
 	logging.info("Attempting to download video.")
@@ -105,7 +105,8 @@ def main():
 		convertToPngs(movieName, preName, wdir)
 		logging.info("converted movie to pngs.")
 	else:
-		print "some pngs already exist. This code is only for demos.\nExiting."
+		logging.info("Exiting - pngs exist.")
+		print "Some pngs already exist. This code is only for demos.\nExiting."
 		logging.info("Exited due to pre-existing pngs.")
 		raise SystemExit
 
