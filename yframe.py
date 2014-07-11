@@ -16,9 +16,9 @@ def convertToPngs(movieName, frameOutName, wdir='', startFrame =0, endFrame=99):
 						should not have image type at the end
 
 		wdir: working directory (i.e. where the movie is and
-					where the frames will be written). In general
-					this should be its own directory for each movie,
-					since there are many frames in a given movie.
+				where the frames will be written). In general
+				this should be its own directory for each movie,
+				since there are many frames in a given movie.
 
 		startFrame: first frame # to be written out
 
@@ -105,7 +105,6 @@ def main():
 		raise SystemExit
 
 	logging.info("Successfully instantiated Pafy object from video URL")
-	logging.info("Attempting to download video.")
 
 	# Name & directory formating.
 	cwd = os.getcwd()
@@ -114,6 +113,8 @@ def main():
 	wdir = cwd + dirName
 	movieName = preName + "." + best.extension
 	outName = cwd + dirName + movieName
+	logging.info("Video Name: {0}".format(best.title))
+	logging.info("Video Name converted to: {0}".format(preName))
 
 	# see if directory exists
 	# TODO: since we only have the first 5 words, there could
@@ -121,8 +122,8 @@ def main():
 	# should have a method of dealing with this.
 	files = [x.replace(cwd, '').strip('/') for x in g.glob(cwd + "/*")]
 	if preName not in files:
-		logging.info("Creating directory {dirName}")
 		os.system("mkdir {0}".format(wdir))
+		logging.info("Created directory {0}".format(wdir))
 
 	# see if movie exists in directory - if not create it
 	# TODO: really, we don't need to do this if we just made the directory.
@@ -146,7 +147,7 @@ def main():
 		print "Some pngs already exist. This code is only for demos.\nExiting."
 		logging.info("Exited due to pre-existing pngs.")
 		raise SystemExit
-	logging.info("Success!\n\n\n")
+	logging.info("Success!\n\n")
 	print "\nSuccess!\n"
 
 if __name__ == '__main__':
