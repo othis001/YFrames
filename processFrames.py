@@ -43,7 +43,6 @@ capture = cv.CaptureFromFile(movieName)
 NframesTot = int(cv.GetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_COUNT))
 Nframes = floor(float(NframesTot)/float(frameStep) + 1.5)
 
-frame = True
 change = np.zeros( Nframes )
 grad = np.zeros( Nframes )
 j= 0
