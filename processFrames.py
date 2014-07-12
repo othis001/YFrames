@@ -46,7 +46,6 @@ Nframes = floor(float(NframesTot)/float(frameStep) + 1.5)
 frame = True
 change = np.zeros( Nframes )
 grad = np.zeros( Nframes )
-k = 0
 j= 0
 for k in xrange(NframesTot):
 	frame = cv.QueryFrame(capture)
@@ -82,6 +81,7 @@ refChange[:2] = 0.
 refChange[-2:] = 0.
 
 # normalization just to put on the same scale
+# just for visualization
 gradChange /= np.sum(gradChange)
 refChange /= np.sum(refChange)
 
@@ -97,6 +97,7 @@ X = np.array([left,right]).T.flatten()
 Ygrad = np.array([gradBins,gradBins]).T.flatten()
 Yref = np.array([refBins,refBins]).T.flatten()
 
+# note that these are on a log scale
 ax.plot(X,np.log(1.+Ygrad),'r',linewidth = 2, alpha = 0.7, label = 'gradient')
 ax.plot(X,np.log(1.+Yref), 'k', linewidth = 2, alpha = 0.7, label = 'reference')
 ax.set_xlabel("Magnitude")
