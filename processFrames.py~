@@ -56,7 +56,8 @@ for k in xrange(NframesTot):
 		change[j] = np.linalg.norm( np.abs( imOld - imNew) )
 		j+= 1
 
-suspect = np.argsort( change )[::-1][:Nsummary]
+deltaChange = np.abs(np.gradient(change))
+suspect = np.argsort( deltaChange )[::-1][:Nsummary]
 
 suspectFrames = [j*frameStep for j in suspect]
 capture = cv.CaptureFromFile(movieName)
