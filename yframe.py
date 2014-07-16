@@ -79,23 +79,16 @@ def convertToPngs(movieName, frameOutName, wdir='', \
 
 def toCamelCase(preOutName, maxWords = 5):
 	"""crude function to convert a youtube video name into Camel Case"""
-	outName = ''
-	space = False
-	nWords = 0
-	for s in preOutName:
-		if s == ' ':
-			space = True
-			nWords += 1
-			if nWords == maxWords:
-				break
-		if s.isalnum():
-			if space:
-				s = s.upper()
-				space = False
-			else:
-				s = s.lower()
-			outName += s
-	return outName
+	nameType = type(preOutName)
+	if nameType != str:
+		raise TypeError('Cannot format type {0} to Camel Case'.format(nameType))
+	lenName = len(preOutName)
+	if lenName == 0:
+		raise ValueError('Given name to format has length 0')
+	preOutName = ''.join([u for u in preOutName.title() if u.isalnum() or\
+															u.isspace()])
+	preOutName = ''.join(preOutName.split(' ')[:min(maxWords,lenName)])
+	return preOutName.replace(' ', '')
 
 def main():
 	"""
