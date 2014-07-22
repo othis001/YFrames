@@ -23,7 +23,7 @@ frameStep = 2
 # you can vary it and see the difference. It might be 
 # important to set it low on your computer for performance
 # reasons (i.e. 64/32/16).
-maxDim = 128
+maxDim = 64
 
 # we are not using Nsummary right now.
 # Nsummary is the number of summary frames that you desire.
@@ -43,9 +43,8 @@ capture = cv.CaptureFromFile(movieName)
 NframesTot = int(cv.GetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_COUNT))
 Nframes = floor(float(NframesTot)/float(frameStep) + 1.5)
 
-change = np.zeros( Nframes )
-grad = np.zeros( Nframes )
-j= 0
+framesArray = np.zeros((int(Nframes), maxDim), dtype=complex)
+
 for k in xrange(NframesTot):
 	frame = cv.QueryFrame(capture)
 	if k % frameStep == 0:
@@ -54,35 +53,30 @@ for k in xrange(NframesTot):
 			maxFrameDim = max(size)
 			scale =float(maxFrameDim)/float(maxDim)
 			newSize = (int(floor(size[0]/scale + .5)), \
-						int(floor(size[1]/scale + .5)) )
+						int(floor(size[0]/scale + .5)) )
 			smallFrame = cv.CreateImage(newSize,frame.depth,frame.nChannels)
 			cv.Resize(frame, smallFrame)
 			frame = smallFrame
-		if j == 0:
-			imRef = np.sum( np.asarray( frame[:,:], dtype=np.float), axis=2)
-			imOld = imRef
-		else:
-			imOld = imNew
-			pass
+			Im = np.array(frame[::])
+			Im = Im[:,:,0]
+			eigVal, eigVec = np.linalg.eig(Im)
+			framesArray[k,:] = eigVec[:,0]
 
-		imNew = np.sum( np.asarray( frame[:,:] , dtype=np.float), axis=2)
-		change[j] = np.linalg.norm( np.abs( imRef - imNew) )
-		grad[j] = np.linalg.norm( np.abs( imOld - imNew) )
-		j+= 1
+	
 
-refChange = np.abs(np.gradient(change))
-gradChange = np.abs(np.gradient(grad))
+#refChange = np.abs(np.gradient(change))
+#gradChange = np.abs(np.gradient(grad))
 # set endpoints to zero since there are no data there
-gradChange[:2] = 0.
-gradChange[-2:] = 0.
+#gradChange[:2] = 0.
+#gradChange[-2:] = 0.
 
-refChange[:2] = 0.
-refChange[-2:] = 0.
+#refChange[:2] = 0.
+#refChange[-2:] = 0.
 
 # normalization just to put on the same scale
 # just for visualization
-gradChange /= np.sum(gradChange)
-refChange /= np.sum(refChange)
+#gradChange /= np.sum(gradChange)
+#refChange /= np.sum(refChange)
 
 # don't worry to much about the syntax for the plotting
 # but there is plenty of online documentation if you are interested
