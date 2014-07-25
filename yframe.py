@@ -86,7 +86,7 @@ def toCamelCase(preOutName, maxWords = 5):
 	if lenName == 0:
 		raise ValueError('Given name to format has length 0')
 	preOutName = ''.join([u for u in preOutName.title() if u.isalnum() or\
-															u.isspace()])
+			u.isspace()])
 	preOutName = ''.join(preOutName.split(' ')[:min(maxWords,lenName)])
 	return preOutName.replace(' ', '')
 

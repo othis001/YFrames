@@ -55,6 +55,7 @@ NframesTot = int(cv.GetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_COUNT))
 
 Nframes = floor(float(NframesTot)/float(frameStep) + 1.5)
 
+<<<<<<< HEAD
 framesArray = np.zeros( (int(Nframes), maxDim), dtype=complex)
 j= 0
 for k in xrange(NframesTot):
@@ -86,6 +87,42 @@ print 'The eigArray is : ', eigArray
 
 #<<<<<<< HEAD
 #=======
+=======
+framesArray = np.zeros((int(Nframes), maxDim), dtype=complex)
+
+for k in xrange(NframesTot):
+	frame = cv.QueryFrame(capture)
+	if k % frameStep == 0:
+		if maxDim:
+			size = cv.GetSize(frame)
+			maxFrameDim = max(size)
+			scale =float(maxFrameDim)/float(maxDim)
+			newSize = (int(floor(size[0]/scale + .5)), \
+						int(floor(size[0]/scale + .5)) )
+			smallFrame = cv.CreateImage(newSize,frame.depth,frame.nChannels)
+			cv.Resize(frame, smallFrame)
+			frame = smallFrame
+			Im = np.array(frame[::])
+			Im = Im[:,:,0]
+			eigVal, eigVec = np.linalg.eig(Im)
+			framesArray[k,:] = eigVec[:,0]
+
+	
+
+#refChange = np.abs(np.gradient(change))
+#gradChange = np.abs(np.gradient(grad))
+# set endpoints to zero since there are no data there
+#gradChange[:2] = 0.
+#gradChange[-2:] = 0.
+
+#refChange[:2] = 0.
+#refChange[-2:] = 0.
+
+# normalization just to put on the same scale
+# just for visualization
+#gradChange /= np.sum(gradChange)
+#refChange /= np.sum(refChange)
+>>>>>>> 3f11b25411f3941d9b56f894af125f2731d4c7d4
 
 # don't worry to much about the syntax for the plotting
 # but there is plenty of online documentation if you are interested
