@@ -10,13 +10,11 @@ from math import floor
 import time
 
 
-#<<<<<<< HEAD
 # put the name of the directory that holds the mp4 in preName.
 # there should be a file preName.mp4 in that directory.
 #preName = 'wildNothingParadiseOfficial'
 # Nsummary is the number of summary frames that you desire.
 Nsummary = 50
-#=======
 # first use yframe to download this file:
 # http://www.youtube.com/watch?v=NU7Mj0Ak14A
 
@@ -27,7 +25,6 @@ preName = 'whatsABitcoinShortAnd'
 # slowly. You can set it to 1 if you want to get every frame
 # or set it to 5 or 10 or 20 and see the change.
 frameStep = 2
-#>>>>>>> 8c4c00a61cf482e620bd9c310e2dbaf38c034ae8
 
 # maxDim is the size of the reduced image that we use.
 # you can vary it and see the difference. It might be 
@@ -63,15 +60,14 @@ for k in xrange(NframesTot):
                 if maxDim:
                         size = cv.GetSize(frame)
                         maxFrameDim = max(size)
-                        scale =float(maxFrameDim)/float(maxDim)
+                        scale = float(maxFrameDim)/float(maxDim)
                         newSize = (int(floor(size[0]/scale + .5)), \
                                                 int(floor(size[0]/scale + .5)) )
                         smallFrame = cv.CreateImage(newSize,frame.depth,frame.nChannels)
                         cv.Resize(frame, smallFrame)
-                        frame = smallFrame
-                        Img = np.array(frame[:,:])
-                        Im = Img.mean(axis=2)
+                        Im = np.array(smallFrame[:]).mean(axis=2)
                         eigVal, eigVec = np.linalg.eig(Im)
+                        eigVec[:,0] = eigVec[:,0]/np.linalg.norm(eigVec[:,0])
                         framesArray[j,:] =  eigVec[:,0]
                         j += 1
 
@@ -79,8 +75,7 @@ for k in xrange(NframesTot):
 eigArray = np.zeros(int(Nframes)) 
 eigArray = np.array([np.linalg.norm(np.dot(framesArray[k,:], framesArray[k+1,:])) for k in xrange(int(Nframes)) if k != int(Nframes) - 1])
 
-print 'The eigArray is : ', eigArray
-
+print 'The eigArray is: ', eigArray.shape
 
 
 # don't worry to much about the syntax for the plotting
@@ -94,8 +89,7 @@ X = np.array([left,right]).T.flatten()
 Yeig = np.array([eigBins,eigBins]).T.flatten()
 
 
-# note that these are on a log scale
-ax.plot(X, Yeig,'r',linewidth = 2, alpha = 0.7, label = 'Dot product of eigenvectors')
+ax.plot(X, np.log(Yeig + 1.),'r',linewidth = 2, alpha = 0.7, label = 'Dot product of eigenvectors')
 ax.set_xlabel("Magnitude")
 ax.set_ylabel("Number of frames")
 ax.set_title("Distribution of dot product")
@@ -104,10 +98,10 @@ ax.grid(True)
 
 
 #Width of bars
-width = 0.09
+width = 0.001
 
 ax = fig.add_subplot(212)
-ax.bar(eigArray, 2000, width, 'r', label = 'Dot product of eigenvectors')
+ax.bar(np.arange(0,1890), eigArray, width, label = 'Dot product of eigenvectors')
 ax.legend()
 ax.set_xlabel("time")
 ax.set_ylabel("Magnitude")
