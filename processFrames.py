@@ -49,8 +49,11 @@ os.chdir(wdir)
 capture = cv.CaptureFromFile(movieName)
 NframesTot = int(cv.GetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_COUNT))
 
+NframesTot = 200
+
 
 Nframes = floor(float(NframesTot)/float(frameStep) + 1.5)
+
 
 framesArray = np.zeros( (int(Nframes), maxDim), dtype=complex)
 j= 0
@@ -74,6 +77,7 @@ for k in xrange(NframesTot):
 #Create and populate array to store dot product of the eigenvectors of the frames 
 eigArray = np.zeros(int(Nframes)) 
 eigArray = np.array([np.linalg.norm(np.dot(framesArray[k,:], framesArray[0,:])) for k in xrange(int(Nframes)) if k != int(Nframes) - 1])
+eigArray = np.gradient(eigArray)
 
 print 'The eigArray is: ', eigArray.shape
 
@@ -89,10 +93,10 @@ X = np.array([left,right]).T.flatten()
 Yeig = np.array([eigBins,eigBins]).T.flatten()
 
 
-ax.plot(X, np.log(Yeig + 1.),'r',linewidth = 2, alpha = 0.7, label = 'Dot product of eigenvectors')
-ax.set_xlabel("Magnitude")
+ax.plot(X, np.log1p(Yeig),'r',linewidth = 2, alpha = 0.7, label = 'Dot product of eigenvectors')
+ax.set_xlabel("Magnitude (logscale)")
 ax.set_ylabel("Number of frames")
-ax.set_title("Distribution of dot product")
+ax.set_title("Distribution of gradient of eigenvector direction")
 ax.legend()
 ax.grid(True)
 
@@ -101,11 +105,10 @@ ax.grid(True)
 width = 0.001
 
 ax = fig.add_subplot(212)
-ax.bar(np.arange(0,1890), eigArray, width, label = 'Dot product of eigenvectors')
-ax.legend()
-ax.set_xlabel("time")
+ax.bar(range(len(eigArray)), eigArray, width)
+ax.set_xlabel("frame number")
 ax.set_ylabel("Magnitude")
-ax.set_title("Plot of metrics")
+ax.set_title("Gradient of eigenvector direction")
 ax.grid(True)
 plt.show()
 
