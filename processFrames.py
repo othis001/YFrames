@@ -28,8 +28,8 @@ os.chdir(wdir)
 
 # initiate movie stream
 capture = cv.CaptureFromFile(movieName)
-NframesTot = 400
-#NframesTot = int(cv.GetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_COUNT))
+#NframesTot = 400
+NframesTot = int(cv.GetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_COUNT))
 
 Nframes = floor(float(NframesTot)/float(frameStep) + 1.5)
 
@@ -50,12 +50,12 @@ for k in xrange(NframesTot):
                         Im = np.array(smallFrame[:]).mean(axis=2)
                         eigVal, eigVec = np.linalg.eig(Im)
                         eigVec[:,0] /= np.linalg.norm(eigVec[:,0])
-                        framesArray[j,:] =  1. - eigVec[:,0]
+                        framesArray[j,:] =  eigVec[:,0]
                         j += 1
 
 #Create and populate array to store dot product of the eigenvectors of the frames 
 eigArray = np.zeros(int(Nframes)) 
-eigArray = np.array([np.linalg.norm(np.dot(framesArray[k,:],framesArray[100,:]))\
+eigArray = np.array([1. - np.linalg.norm(np.dot(framesArray[k,:],framesArray[0,:]))\
 					 for k in xrange(int(Nframes)) if k != int(Nframes) - 1])
 
 eigArray = np.gradient(eigArray)
