@@ -10,31 +10,12 @@ from math import floor
 import time
 
 
-# put the name of the directory that holds the mp4 in preName.
-# there should be a file preName.mp4 in that directory.
-#preName = 'wildNothingParadiseOfficial'
-# Nsummary is the number of summary frames that you desire.
-Nsummary = 50
-# first use yframe to download this file:
-# http://www.youtube.com/watch?v=NU7Mj0Ak14A
-
-# then, don't change anything and run this code
 preName = 'whatsABitcoinShortAnd'
-# frameStep is the frequency of frames that we look at
-# we don't look at everyframe since they are typically changing
-# slowly. You can set it to 1 if you want to get every frame
-# or set it to 5 or 10 or 20 and see the change.
 frameStep = 2
 
 # maxDim is the size of the reduced image that we use.
-# you can vary it and see the difference. It might be 
-# important to set it low on your computer for performance
-# reasons (i.e. 64/32/16).
-maxDim = 64
+maxDim = 32
 
-# we are not using Nsummary right now.
-# Nsummary is the number of summary frames that you desire.
-# Nsummary = 50
 #----------------------------------------------------------
 movieName = preName + '.mp4'
 cdir = os.getcwd()
@@ -47,10 +28,8 @@ os.chdir(wdir)
 
 # initiate movie stream
 capture = cv.CaptureFromFile(movieName)
-NframesTot = int(cv.GetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_COUNT))
-
-NframesTot = 200
-
+NframesTot = 400
+#NframesTot = int(cv.GetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_COUNT))
 
 Nframes = floor(float(NframesTot)/float(frameStep) + 1.5)
 
@@ -76,7 +55,9 @@ for k in xrange(NframesTot):
 
 #Create and populate array to store dot product of the eigenvectors of the frames 
 eigArray = np.zeros(int(Nframes)) 
-eigArray = np.array([np.linalg.norm(np.dot(framesArray[k,:], framesArray[0,:])) for k in xrange(int(Nframes)) if k != int(Nframes) - 1])
+eigArray = np.array([np.linalg.norm(np.dot(framesArray[k,:],framesArray[100,:]))\
+					 for k in xrange(int(Nframes)) if k != int(Nframes) - 1])
+
 eigArray = np.gradient(eigArray)
 
 print 'The eigArray is: ', eigArray.shape
@@ -92,8 +73,7 @@ left,right = edges[:-1],edges[1:]
 X = np.array([left,right]).T.flatten()
 Yeig = np.array([eigBins,eigBins]).T.flatten()
 
-
-ax.plot(X, np.log1p(Yeig),'r',linewidth = 2, alpha = 0.7, label = 'Dot product of eigenvectors')
+ax.plot(X, np.log1p(Yeig),'r',linewidth = 2, alpha = 0.7)
 ax.set_xlabel("Magnitude (logscale)")
 ax.set_ylabel("Number of frames")
 ax.set_title("Distribution of gradient of eigenvector direction")
@@ -110,7 +90,5 @@ ax.set_xlabel("frame number")
 ax.set_ylabel("Magnitude")
 ax.set_title("Gradient of eigenvector direction")
 ax.grid(True)
+plt.tight_layout()
 plt.show()
-
-
-
