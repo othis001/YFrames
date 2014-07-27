@@ -67,13 +67,13 @@ for k in xrange(NframesTot):
                         cv.Resize(frame, smallFrame)
                         Im = np.array(smallFrame[:]).mean(axis=2)
                         eigVal, eigVec = np.linalg.eig(Im)
-                        eigVec[:,0] = eigVec[:,0]/np.linalg.norm(eigVec[:,0])
-                        framesArray[j,:] =  eigVec[:,0]
+                        eigVec[:,0] /= np.linalg.norm(eigVec[:,0])
+                        framesArray[j,:] =  1. - eigVec[:,0]
                         j += 1
 
 #Create and populate array to store dot product of the eigenvectors of the frames 
 eigArray = np.zeros(int(Nframes)) 
-eigArray = np.array([np.linalg.norm(np.dot(framesArray[k,:], framesArray[k+1,:])) for k in xrange(int(Nframes)) if k != int(Nframes) - 1])
+eigArray = np.array([np.linalg.norm(np.dot(framesArray[k,:], framesArray[0,:])) for k in xrange(int(Nframes)) if k != int(Nframes) - 1])
 
 print 'The eigArray is: ', eigArray.shape
 
