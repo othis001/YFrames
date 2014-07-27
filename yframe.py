@@ -79,14 +79,15 @@ def convertToPngs(movieName, frameOutName, wdir='', \
 
 def toCamelCase(preOutName, maxWords = 5):
 	"""crude function to convert a youtube video name into Camel Case"""
-	nameType = type(preOutName)
-	if nameType != str:
-		raise TypeError('Cannot format type {0} to Camel Case'.format(nameType))
+	try:
+		preOutName = ''.join([str(u) for u in preOutName if ord(u) < 128])
+	except Exception as e:
+		raise e
 	lenName = len(preOutName)
 	if lenName == 0:
 		raise ValueError('Given name to format has length 0')
 	preOutName = ''.join([u for u in preOutName.title() if u.isalnum() or\
-															u.isspace()])
+									u.isspace()])
 	preOutName = ''.join(preOutName.split(' ')[:min(maxWords,lenName)])
 	return preOutName.replace(' ', '')
 
@@ -128,7 +129,7 @@ def main():
 		best = video.getbest(preftype="mp4")
 	except Exception as e:
 		logging.exception(e)
-		print 'Could not connect. Exiting'
+		print(e)
 		raise SystemExit
 	if best == None:
 		logging.exception("pafy could not connect. Exiting.")
@@ -144,8 +145,9 @@ def main():
 	wdir = cwd + dirName
 	movieName = preName + "." + best.extension
 	outName = cwd + dirName + movieName
-	logging.info("Video Name: {0}".format(best.title))
-	logging.info("Video Name converted to: {0}".format(preName))
+	msg = "Video Name converted to: {0}".format(preName)
+	logging.info(msg)
+	print msg
 
 	# see if directory exists
 	# TODO: since we only have the first 5 words, there could
