@@ -7,7 +7,14 @@ import Image
 import glob as g
 import cv
 from math import floor
+import time
 
+
+# put the name of the directory that holds the mp4 in preName.
+# there should be a file preName.mp4 in that directory.
+#preName = 'wildNothingParadiseOfficial'
+# Nsummary is the number of summary frames that you desire.
+Nsummary = 50
 # first use yframe to download this file:
 # http://www.youtube.com/watch?v=NU7Mj0Ak14A
 
@@ -23,7 +30,7 @@ frameStep = 2
 # you can vary it and see the difference. It might be 
 # important to set it low on your computer for performance
 # reasons (i.e. 64/32/16).
-maxDim = 128
+maxDim = 64
 
 # we are not using Nsummary right now.
 # Nsummary is the number of summary frames that you desire.
@@ -41,73 +48,60 @@ os.chdir(wdir)
 # initiate movie stream
 capture = cv.CaptureFromFile(movieName)
 NframesTot = int(cv.GetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_COUNT))
+
+
 Nframes = floor(float(NframesTot)/float(frameStep) + 1.5)
 
-change = np.zeros( Nframes )
-grad = np.zeros( Nframes )
+framesArray = np.zeros( (int(Nframes), maxDim), dtype=complex)
 j= 0
 for k in xrange(NframesTot):
-	frame = cv.QueryFrame(capture)
-	if k % frameStep == 0:
-		if maxDim:
-			size = cv.GetSize(frame)
-			maxFrameDim = max(size)
-			scale =float(maxFrameDim)/float(maxDim)
-			newSize = (int(floor(size[0]/scale + .5)), \
-						int(floor(size[1]/scale + .5)) )
-			smallFrame = cv.CreateImage(newSize,frame.depth,frame.nChannels)
-			cv.Resize(frame, smallFrame)
-			frame = smallFrame
-		if j == 0:
-			imRef = np.sum( np.asarray( frame[:,:], dtype=np.float), axis=2)
-			imOld = imRef
-		else:
-			imOld = imNew
-			pass
+        frame = cv.QueryFrame(capture)
+        if k % frameStep == 0:  
+                if maxDim:
+                        size = cv.GetSize(frame)
+                        maxFrameDim = max(size)
+                        scale = float(maxFrameDim)/float(maxDim)
+                        newSize = (int(floor(size[0]/scale + .5)), \
+                                                int(floor(size[0]/scale + .5)) )
+                        smallFrame = cv.CreateImage(newSize,frame.depth,frame.nChannels)
+                        cv.Resize(frame, smallFrame)
+                        Im = np.array(smallFrame[:]).mean(axis=2)
+                        eigVal, eigVec = np.linalg.eig(Im)
+                        eigVec[:,0] = eigVec[:,0]/np.linalg.norm(eigVec[:,0])
+                        framesArray[j,:] =  eigVec[:,0]
+                        j += 1
 
-		imNew = np.sum( np.asarray( frame[:,:] , dtype=np.float), axis=2)
-		change[j] = np.linalg.norm( np.abs( imRef - imNew) )
-		grad[j] = np.linalg.norm( np.abs( imOld - imNew) )
-		j+= 1
+#Create and populate array to store dot product of the eigenvectors of the frames 
+eigArray = np.zeros(int(Nframes)) 
+eigArray = np.array([np.linalg.norm(np.dot(framesArray[k,:], framesArray[k+1,:])) for k in xrange(int(Nframes)) if k != int(Nframes) - 1])
 
-refChange = np.abs(np.gradient(change))
-gradChange = np.abs(np.gradient(grad))
-# set endpoints to zero since there are no data there
-gradChange[:2] = 0.
-gradChange[-2:] = 0.
+print 'The eigArray is: ', eigArray.shape
 
-refChange[:2] = 0.
-refChange[-2:] = 0.
-
-# normalization just to put on the same scale
-# just for visualization
-gradChange /= np.sum(gradChange)
-refChange /= np.sum(refChange)
 
 # don't worry to much about the syntax for the plotting
 # but there is plenty of online documentation if you are interested
 # stack overflow is your friend.
 fig = plt.figure(1)
 ax = fig.add_subplot(211)
-gradBins, edges = np.histogram(gradChange, 50)
-refBins, edges = np.histogram(refChange, 50)
+eigBins, edges = np.histogram(abs(eigArray), 50)
 left,right = edges[:-1],edges[1:]
 X = np.array([left,right]).T.flatten()
-Ygrad = np.array([gradBins,gradBins]).T.flatten()
-Yref = np.array([refBins,refBins]).T.flatten()
+Yeig = np.array([eigBins,eigBins]).T.flatten()
 
-# note that these are on a log scale
-ax.plot(X,np.log(1.+Ygrad),'r',linewidth = 2, alpha = 0.7, label = 'gradient')
-ax.plot(X,np.log(1.+Yref), 'k', linewidth = 2, alpha = 0.7, label = 'reference')
+
+ax.plot(X, np.log(Yeig + 1.),'r',linewidth = 2, alpha = 0.7, label = 'Dot product of eigenvectors')
 ax.set_xlabel("Magnitude")
-ax.set_ylabel("Log (2) of Number of frames")
-ax.set_title("Distribution of metrics")
+ax.set_ylabel("Number of frames")
+ax.set_title("Distribution of dot product")
 ax.legend()
 ax.grid(True)
 
+
+#Width of bars
+width = 0.001
+
 ax = fig.add_subplot(212)
-ax.plot(gradChange, 'r', linewidth = 2, alpha = 0.7, label = 'gradient')
-ax.plot(refChange, 'k', linewidth = 2, alpha = 0.7, label = 'reference')
+ax.bar(np.arange(0,1890), eigArray, width, label = 'Dot product of eigenvectors')
 ax.legend()
 ax.set_xlabel("time")
 ax.set_ylabel("Magnitude")
@@ -115,23 +109,5 @@ ax.set_title("Plot of metrics")
 ax.grid(True)
 plt.show()
 
-
-# ignore this part - we're not writing out the summary
-# at this moment.
-"""
-suspect = np.argsort( gradChange )[::-1][:Nsummary]
-suspectFrames = [j*frameStep for j in suspect]
-capture = cv.CaptureFromFile(movieName)
-frame = True
-
-
-s = 0
-for k in xrange(NframesTot):
-	frame = cv.QueryFrame(capture)
-	if k in suspectFrames:
-		cv.SaveImage("SummaryFrames{0:03d}.png".format(s), frame)
-		s += 1
-print '\nSuccess!\n'
-"""
 
 

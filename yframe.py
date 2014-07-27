@@ -7,6 +7,7 @@ import glob as g
 import cv
 from math import floor
 
+
 def convertToPngs(movieName, frameOutName, wdir='', \
 					startFrame=0, endFrame=499, maxDim = 128):
 	"""
