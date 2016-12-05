@@ -2,10 +2,10 @@
 
 This consists of two programs.
 
-#YFrames
+#yframes.py
 
 Downloads a video off youtube and converts its frames to a collection of png files.
 
-#ProcessFrames
+#processFrames.py
 
-Measures the eigenvalues of the frames (viewed as integer matrices).
+Measures dot products of the eigenvectors of the frames (viewed as integer matrices).
