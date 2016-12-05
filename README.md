@@ -2,7 +2,7 @@
 
 This consists of two programs.
 
-##yframes.py
+##yframe.py
 
 Downloads a video off youtube and converts its frames to a collection of png files.
 
